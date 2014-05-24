@@ -5,6 +5,7 @@
 	"autoload": {
 		"psr-0": {
 			"PhpCoap": "src/"
-		}
+		},
+		"files": ["src/PhpCoap/functions.php"]
 	}
 }

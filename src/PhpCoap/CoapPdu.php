@@ -54,6 +54,11 @@ class CoapPdu extends \Evenement\EventEmitter
 		return $this->messageId;
 	}
 
+	function setMessageId( $id )
+	{
+		$this->messageId = (int) $id;
+	}
+
 	function addOption( CoapOption $opt )
 	{
 		array_push( $this->options, $opt );

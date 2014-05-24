@@ -9,7 +9,7 @@ use React\EventLoop\Timer\TimerInterface;
 use React\EventLoop\Timer\Timers;
 
 
-class StreamSocketSelectLoop extends \React\EventLoop\StreamSelectLoop
+class StreamSocketSelectLoop implements \React\EventLoop\LoopInterface
 {
 	private $readSockets = [];
 	private $writeSockets = [];
@@ -249,6 +249,15 @@ class StreamSocketSelectLoop extends \React\EventLoop\StreamSelectLoop
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function stop()
+    {
+        $this->running = false;
+    }
+
+
     private function waitForStreamActivity($timeout)
     {
         $read  = $this->readStreams;
@@ -272,6 +281,29 @@ class StreamSocketSelectLoop extends \React\EventLoop\StreamSelectLoop
                 call_user_func($this->writeListeners[$key], $stream, $this);
             }
         }
+    }
+
+    /**
+     * Emulate a stream_select() implementation that does not break when passed
+     * empty stream arrays.
+     *
+     * @param array        &$read   An array of read streams to select upon.
+     * @param array        &$write  An array of write streams to select upon.
+     * @param integer|null $timeout Activity timeout in microseconds, or null to wait forever.
+     *
+     * @return integer The total number of streams that are ready for read/write.
+     */
+    protected function streamSelect(array &$read, array &$write, $timeout)
+    {
+        if ($read || $write) {
+            $except = null;
+
+            return stream_select($read, $write, $except, $timeout === null ? null : 0, $timeout);
+        }
+
+        usleep($timeout);
+
+        return 0;
     }
 
    private function waitForSocketActivity($timeout)
