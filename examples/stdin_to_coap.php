@@ -2,7 +2,7 @@
 
 require( __DIR__ . '/../vendor/autoload.php' );
 
-$loop = new PhpCoap\StreamSocketSelectLoop();
+$loop = React\EventLoop\Factory::create();
 
 $client = new PhpCoap\Client( $loop );
 

@@ -47,9 +47,4 @@ class CoapRequest extends CoapPdu
 		}
 	}
 
-	function send()
-	{
-		$this->emit( 'send', array( $this ) );
-	}
-
 }

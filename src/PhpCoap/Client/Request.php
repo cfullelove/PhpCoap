@@ -1,6 +1,11 @@
 <?php
 
-namespace PhpCoap;
+namespace PhpCoap\Client;
+
+use PhpCoap\PacketStream;
+use PhpCoap\CoapRequest;
+use PhpCoap\CoapResponse;
+
 
 class Request extends \Evenement\EventEmitter
 {
@@ -47,7 +52,7 @@ class Request extends \Evenement\EventEmitter
 		$this->state = self::STATE_SENDING_REQUEST;
 
 		$this->connect()
-			->then( function( Socket $sock ) use ($requestData, $sockRef, $that ) {
+			->then( function( $sock ) use ($requestData, $sockRef, $that ) {
 				$that->sock = $sock;
 
 				$sock->on( 'packet', array( $that, 'handlePacket' ) );
@@ -96,7 +101,7 @@ class Request extends \Evenement\EventEmitter
 
 			// Badness!
 			// TODO: Handle error
-			$this->sendAck( $this->sock, $resp->getMessageId(), '5.00' );
+			$this->sendAck( $resp, '5.00' );
 		}
 
 		// Got a Confirmed Response after inital Acknowledgement
@@ -124,6 +129,7 @@ class Request extends \Evenement\EventEmitter
 			{
 				$this->state = self::STATE_WAITING_CLOSE;
 				$this->sendAck( $resp );
+				$this->sock->on( 'sent', array( $this, 'close' ) );
 				$this->emit( 'response', array( $resp ) );
 				return;
 			}
@@ -146,14 +152,6 @@ class Request extends \Evenement\EventEmitter
 		$ack->setMessageId( $resp->getMessageId() );
 
 		$pkt = $ack->getMessage();
-
-		// TODO: update for async send
-		//socket_send( $this->sock, $pkt, strlen( $pkt ), null );
-		
-		if ( $this->state == self::STATE_WAITING_CLOSE )
-		{
-			$this->sock->on( 'sent', array( $this, 'close' ) );
-		}
 
 		$this->sock->send( $pkt );
 	}

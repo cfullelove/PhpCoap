@@ -14,16 +14,16 @@ class PacketBuffer extends \Evenement\EventEmitter
 		$this->loop = $loop;
 	}
 
-	function send( $packet )
+	function send( $packet, $peer = null )
 	{
 		
-        array_push( $this->packets, $packet );
+        array_push( $this->packets, array( 'data' => $packet, 'peer' => $peer ) );
 
         if ( ! $this->listening )
         {
             $this->listening = true;
 
-            $this->loop->addWriteSocket($this->sock, array($this, 'handleSend'));
+            $this->loop->addWriteStream($this->sock, array($this, 'handleSend'));
         }
 	}
 
@@ -31,7 +31,10 @@ class PacketBuffer extends \Evenement\EventEmitter
 	{
 		$pkt = array_shift( $this->packets );
 
-		socket_send( $this->sock, $pkt, strlen( $pkt ), null );
+		if ( $pkt['peer'] !== null )
+			stream_socket_sendto( $this->sock, $pkt['data'], 0, $pkt['peer'] );
+		else
+			stream_socket_sendto( $this->sock, $pkt['data'] );
 
 		$this->packet = null;
 
@@ -40,7 +43,7 @@ class PacketBuffer extends \Evenement\EventEmitter
 		if ( count( $this->packets ) == 0 )
 		{
 			$this->listening = false;
-			$this->loop->removeWriteSocket( $this->sock );
+			$this->loop->removeWriteStream( $this->sock );
 			$this->emit( 'sent-all' );
 		}
 	}
@@ -48,7 +51,7 @@ class PacketBuffer extends \Evenement\EventEmitter
 	function close()
 	{
 		$this->packets = array();
-		$this->loop->removeWriteSocket( $this->sock );
+		$this->loop->removeWriteStream( $this->sock );
 	}
 
 }

@@ -1,6 +1,11 @@
 <?php
 
-namespace PhpCoap;
+namespace PhpCoap\Client;
+
+use PhpCoap\PacketStream;
+use PhpCoap\CoapRequest;
+use PhpCoap\CoapResponse;
+
 
 class Client extends \Evenement\EventEmitter
 {
@@ -17,7 +22,7 @@ class Client extends \Evenement\EventEmitter
 	{
 		$coapRequest = new CoapRequest( $uri, $method, '' );
 		$coapRequest->setCode( $method );
-		$coapRequest->setType( CoapRequest::NON );
+		$coapRequest->setType( CoapRequest::CON );
 		
 		return new Request( $this->connector, $coapRequest );
 	}

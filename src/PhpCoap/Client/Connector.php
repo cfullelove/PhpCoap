@@ -1,9 +1,13 @@
 <?php
 
-namespace PhpCoap;
+namespace PhpCoap\Client;
 
 use React\Promise;
 use React\Promise\Deferred;
+use PhpCoap\PacketStream;
+use PhpCoap\CoapRequest;
+use PhpCoap\CoapResponse;
+
 
 class Connector extends \Evenement\EventEmitter
 {
@@ -19,15 +23,18 @@ class Connector extends \Evenement\EventEmitter
 	{
 		$deferred = new Deferred();
 
-		$sock = socket_create( AF_INET, SOCK_DGRAM, getprotobyname( 'udp' ) );
+		$sock = stream_socket_client( sprintf( 'udp://%s:%s', $host, $port ), $errno, $errstr );
 
-		socket_connect( $sock, $host, $port );
-
+		if ( $sock == false )
+		{
+			$this->emit( 'error', array( $errno, $errstr ) );
+			return;
+		}
 
 		$loop = $this->loop;
 
-		$this->loop->addWriteSocket( $sock, function( $sock ) use ( $loop, $deferred ) {
-			$loop->removeWriteSocket( $sock );
+		$this->loop->addWriteStream( $sock, function( $sock ) use ( $loop, $deferred ) {
+			$loop->removeWriteStream( $sock );
 
 			$deferred->resolve( $sock );
 		});
@@ -38,6 +45,6 @@ class Connector extends \Evenement\EventEmitter
 
 	function handleConnect( $sock )
 	{
-		return new Socket( $sock, $this->loop );
+		return new PacketStream( $sock, $this->loop );
 	}
 }

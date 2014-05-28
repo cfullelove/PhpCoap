@@ -2,7 +2,7 @@
 
 namespace PhpCoap;
 
-class CoapPdu extends \Evenement\EventEmitter
+class CoapPdu
 {
 	protected $version = 1;
 	protected $type = 0;
