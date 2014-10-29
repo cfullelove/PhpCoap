@@ -98,10 +98,28 @@ class RequestHandler extends \Evenement\EventEmitter
 		$this->sock->send( $ack->getMessage() );
 	}
 
-    public function close()
-    {
-    	$this->state = self::STATE_END;
-    	$this->emit( 'complete' );
-    }
-
+		public function close()
+		{
+			$this->state = self::STATE_END;
+			$this->emit( 'complete' );
+		}
+		
+		public function getPeer()
+		{
+			return $this->peer;
+		}
+		
+		public function getPeerHost()
+		{
+			if ($this->peer)
+				return substr($this->peer,0,strpos($this->peer,':'));
+			return null;
+		}
+		
+		public function getPeerPort()
+		{
+			if ($this->peer)
+				return substr($this->peer,strpos($this->peer,':')+1,strlen($this->peer));
+			return null;
+		}
 }
