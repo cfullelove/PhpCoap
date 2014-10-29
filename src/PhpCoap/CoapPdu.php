@@ -49,6 +49,11 @@ class CoapPdu
 		$this->code = $string;
 	}
 
+	function getCode()
+	{
+		return $this->code;
+	}
+
 	function getMessageId()
 	{
 		return $this->messageId;
