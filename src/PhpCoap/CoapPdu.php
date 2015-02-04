@@ -69,6 +69,11 @@ class CoapPdu
 		array_push( $this->options, $opt );
 	}
 
+	function GetOptions()
+	{
+		return  $this->options;
+	}
+
 	function getMessage()
 	{
 		$this->compile();
