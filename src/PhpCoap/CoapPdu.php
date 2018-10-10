@@ -253,9 +253,7 @@ class CoapPdu
 		{
 			$optLen = 13 + $buf[$i];
 			$i++;
-		}
-
-		if ( $optLen == 14 )
+		} else if ( $optLen == 14 )
 		{
 			$optLen = 269 + ( $buf[$i] << 8 ) + $buf[ $i + 1 ];
 			$i++;
